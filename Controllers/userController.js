@@ -38,9 +38,7 @@ export const signIn = async (req, res) => {
       res.status(400).json({ message: "User not found" });
     }
 
-    const hashedPassword = bcrypt.hash(password, 10);
-
-    const isMatch = await bcrypt.compare(hashedPassword, User.password);
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       res.status(401).json({ message: "Invalid credentail" });
     }
@@ -63,7 +61,7 @@ export const signIn = async (req, res) => {
 
     res.cookie("accessToken", accessToken, { httpOnly: true });
     res.cookie("refreshToken", refreshToken, { httpOnly: true });
-    res.json({ message: "Log In successfully.", accessToken , refreshToken});
+    res.json({ message: "Log In successfully.", accessToken, refreshToken });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Can not log in." });
