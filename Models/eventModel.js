@@ -47,8 +47,12 @@ const eventSchema = mongoose.Schema({
     default: false,
   },
 });
+
 //define a compound unique index
-eventSchema.index({ title: 1, date: 1, location: 1 }, { unique: true });
+eventSchema.index(
+  { title: 1, date: 1, location: 1 },
+  { unique: true, partialFilterExpression: { isDeleted: false } }
+);
 
 const Event = mongoose.model("Event", eventSchema);
 export default Event;

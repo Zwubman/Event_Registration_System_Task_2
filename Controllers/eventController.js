@@ -14,7 +14,7 @@ export const createEvent = async (req, res) => {
       speakers,
       agenda,
     } = req.body;
-    const isExist = await Event.findOne({ title, date, location });
+    const isExist = await Event.findOne({ title, date, location, isDeleted: false });
 
     if (isExist) {
       res.status(400).json({ message: "The event is already exist" });
@@ -45,7 +45,7 @@ export const createEvent = async (req, res) => {
 // get all event that have been created
 export const getAllEvent = async (req, res) => {
   try {
-    const events = await Event.find().select(
+    const events = await Event.find({ isDeleted: false }).select(
       "title description date time location availableSlot"
     );
 
@@ -63,7 +63,10 @@ export const viewDetails = async (req, res) => {
 
     // Check if eventId is a valid MongoDB ObjectId
 
-    const event = await Event.findById(eventId).select("agenda speakers");
+    const event = await Event.findOne({
+      _id: eventId,
+      isDeleted: false,
+    }).select("agenda speakers");
 
     if (!event) {
       return res.status(404).json({ message: "Event not found." });
@@ -93,7 +96,7 @@ export const updateEvent = async (req, res) => {
 
     // Update the event if it exists
     const updatedEvent = await Event.findOneAndUpdate(
-      { _id: eventId },
+      { _id: eventId, isDeleted: false },
       { $set: req.body },
       { new: true }
     );
@@ -108,5 +111,25 @@ export const updateEvent = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Can't update the event." });
+  }
+};
+
+// delete event
+export const deleteEvent = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    const event = await Event.findByIdAndUpdate(
+      {_id: eventId, isDeleted: false},
+      { isDeleted: true },
+      { new: true }
+    );
+    if (!event) {
+      res.status(404).json({ message: "Event not found" });
+    }
+
+    res.status(200).json({ message: "Event deleted successfully." });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Can't delete the event" });
   }
 };
