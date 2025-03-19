@@ -24,6 +24,10 @@ const userSchema = mongoose.Schema({
         enum: ["Admin", "User"], 
         default: "User", 
         required: true
+    },
+    phone:{
+        type: String,
+        allowNull: true,
     }
 });
 
