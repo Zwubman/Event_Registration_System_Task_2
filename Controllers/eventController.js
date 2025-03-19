@@ -62,7 +62,6 @@ export const viewDetails = async (req, res) => {
     const eventId = req.params.id;
 
     // Check if eventId is a valid MongoDB ObjectId
-    
 
     const event = await Event.findById(eventId).select("agenda speakers");
 
@@ -77,5 +76,37 @@ export const viewDetails = async (req, res) => {
   }
 };
 
+//To update event
+export const updateEvent = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    const {
+      title,
+      description,
+      date,
+      time,
+      location,
+      availableSlot,
+      speakers,
+      agenda,
+    } = req.body;
 
-//To 
+    // Update the event if it exists
+    const updatedEvent = await Event.findOneAndUpdate(
+      { _id: eventId },
+      { $set: req.body },
+      { new: true }
+    );
+
+    if (!updateEvent) {
+      res.status(404).json({ message: "Event not found." });
+    }
+
+    res
+      .status(200)
+      .json({ message: "Event updated successfully.", updatedEvent });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Can't update the event." });
+  }
+};
