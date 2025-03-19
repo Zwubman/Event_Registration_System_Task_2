@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Event from "../Models/eventModel.js";
 
 //create event
@@ -55,5 +56,26 @@ export const getAllEvent = async (req, res) => {
   }
 };
 
+// To veiw the detail of the event
+export const viewDetails = async (req, res) => {
+  try {
+    const eventId = req.params.id;
 
-// To 
+    // Check if eventId is a valid MongoDB ObjectId
+    
+
+    const event = await Event.findById(eventId).select("agenda speakers");
+
+    if (!event) {
+      return res.status(404).json({ message: "Event not found." });
+    }
+
+    res.status(200).json(event);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Can't access event's detail" });
+  }
+};
+
+
+//To 
