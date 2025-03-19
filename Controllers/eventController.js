@@ -1,7 +1,6 @@
 import Event from "../Models/eventModel.js";
 
-
-//create event 
+//create event
 export const createEvent = async (req, res) => {
   try {
     const {
@@ -27,7 +26,7 @@ export const createEvent = async (req, res) => {
       time,
       location,
       availableSlot,
-      speakers, 
+      speakers,
       agenda: agenda.map((item) => ({
         time: item.time,
         topic: item.topic,
@@ -42,6 +41,19 @@ export const createEvent = async (req, res) => {
   }
 };
 
+// get all event that have been created
+export const getAllEvent = async (req, res) => {
+  try {
+    const events = await Event.find().select(
+      "title description date time location availableSlot"
+    );
+
+    res.status(200).json(events);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Can'n not fetch event." });
+  }
+};
 
 
-
+// To 
