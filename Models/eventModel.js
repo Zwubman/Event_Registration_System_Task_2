@@ -46,6 +46,32 @@ const eventSchema = mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  registeredUsers: [
+    {
+      userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+      },
+      firstName: {
+        type: String,
+        required: true,
+      },
+      lastName: {
+        type: String,
+        required: true,
+      },
+      email: {
+        type: String,
+        required: true,
+      },
+      phone: {
+        type: String,
+        required: false,
+      },
+    },
+    
+  ],
 });
 
 //define a compound unique index

@@ -69,3 +69,28 @@ export const signIn = async (req, res) => {
     res.status(500).json({ message: "Can not log in." });
   }
 };
+
+//User Register for the event
+export const userRegistration = async (req, res) => {
+  try {
+    const { firstName, lastName, phone, email } = req.body;
+    const eventId = req.params;
+    const userId = req.user._id;
+
+    const event = await Event.findOne({ _id: eventId });
+
+    if (!event) {
+      res.status(404).json({ message: "Event not found" });
+    }
+
+    //Check if the user is already registered for the event or not
+    if (event.registeredUsers.include(userId)) {
+      res
+        .status(400)
+        .json({ message: "User is already registered for this event." });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Registration fail." });
+  }
+};

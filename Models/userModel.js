@@ -28,7 +28,13 @@ const userSchema = mongoose.Schema({
     phone:{
         type: String,
         allowNull: true,
-    }
+    },
+    registerdToEvents: [
+        {
+            tyep: mongoose.Schema.Types.ObjectId,
+            ref: "Event"
+        }
+    ]
 });
 
 const User = mongoose.model('User', userSchema);
