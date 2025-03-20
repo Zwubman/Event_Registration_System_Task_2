@@ -31,10 +31,10 @@ const userSchema = mongoose.Schema({
     },
     registerdToEvents: [
         {
-            tyep: mongoose.Schema.Types.ObjectId,
-            ref: "Event"
-        }
-    ]
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Event",
+        },
+    ],
 });
 
 const User = mongoose.model('User', userSchema);

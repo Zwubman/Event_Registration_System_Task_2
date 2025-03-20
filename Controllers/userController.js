@@ -83,12 +83,40 @@ export const userRegistration = async (req, res) => {
       res.status(404).json({ message: "Event not found" });
     }
 
+    //Check the capacity of the event is full or not
+    const capacity = event.availableSlot;
+    const numberOfRegisterd = event.registeredUsers.length;
+    if (numberOfRegisterd >= capacity) {
+      res.status(401).json({
+        message: "Registration failed. No available slots for this event.",
+      });
+    }
+
+    const isRegistered = event.registeredUsers.some(
+      (regUser) => regUser.userId.toString() === userId.toString()
+    );
+
     //Check if the user is already registered for the event or not
-    if (event.registeredUsers.include(userId)) {
+    if (isRegistered) {
       res
         .status(400)
-        .json({ message: "User is already registered for this event." });
+        .json({ message: "User is already registered for this event" });
     }
+
+    //Register user for event
+    event.registeredUsers.push({
+      userId,
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+      email: req.body.email,
+      phone: req.body.phone,
+    });
+
+    await event.save();
+
+    res
+      .status(200)
+      .json({ message: "User registered successfully for the event." });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Registration fail." });
