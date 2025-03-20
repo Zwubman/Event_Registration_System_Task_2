@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import cookie from "cookie-parser";
 import bcrypt from "bcryptjs";
 import User from "../Models/userModel.js";
+import Event from "../Models/eventModel.js";
 
 // User sign up function
 export const signUp = async (req, res) => {
@@ -74,10 +75,11 @@ export const signIn = async (req, res) => {
 export const userRegistration = async (req, res) => {
   try {
     const { firstName, lastName, phone, email } = req.body;
-    const eventId = req.params;
-    const userId = req.user._id;
+    const eventId = req.params.eventId;
+    const userEmail = req.user.email;
 
-    const event = await Event.findOne({ _id: eventId });
+    const event = await Event.findOne({ _id: eventId, isDeleted: false });
+    const users = await User.findOne({ email: userEmail });
 
     if (!event) {
       res.status(404).json({ message: "Event not found" });
@@ -92,33 +94,90 @@ export const userRegistration = async (req, res) => {
       });
     }
 
+    // Check if the user is already registered for the event based on email
     const isRegistered = event.registeredUsers.some(
-      (regUser) => regUser.userId.toString() === userId.toString()
+      (regUser) => regUser.email === userEmail
     );
 
-    //Check if the user is already registered for the event or not
     if (isRegistered) {
       res
         .status(400)
         .json({ message: "User is already registered for this event" });
+    } else {
+      //Register user for event
+      event.registeredUsers.push({
+        firstName,
+        lastName,
+        email,
+        phone,
+      });
+
+      //Store the event in which the user registered
+      users.registerdToEvents.push({
+        eventId,
+        title: event.title,
+        location: event.location,
+        date: event.date,
+      });
     }
 
-    //Register user for event
-    event.registeredUsers.push({
-      userId,
-      firstName: req.body.firstName,
-      lastName: req.body.lastName,
-      email: req.body.email,
-      phone: req.body.phone,
-    });
-
     await event.save();
-
+    await users.save();
     res
       .status(200)
       .json({ message: "User registered successfully for the event." });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Registration fail." });
+  }
+};
+
+//Cancel registration for event
+export const cancelRegistration = async (req, res) => {
+  try {
+    const eventId = req.params.eventId;
+    const userEmail = req.user.email;
+
+    const event = await Event.findOne({ _id: eventId, isDeleted: false });
+    const users = await User.findOne({ email: userEmail });
+
+    if (!event) {
+      console.log(error);
+      res.status(404).json({ message: "Event not found." });
+    }
+
+    if (!user) {
+      res.status(404).json({ message: "User not found." });
+    }
+
+    const isRegistered = event.registeredUsers.some(
+      (regUser) => regUser.email === userEmail
+    );
+
+    if (!isRegistered) {
+      res
+        .status(404)
+        .json({ message: "User is not registered for this event." });
+    }
+
+    // Remove the user from event's registeredUsers
+    event.registeredUsers = event.registeredUsers.filter(
+      (regUser) => regUser.email !== userEmail
+    );
+
+    // Remove the event from user's registered events
+    users.registerdToEvents = users.registerdToEvents.filter(
+      (regUser) => regUser.eventId !== eventId
+    );
+
+    await event.save();
+    await users.save();
+
+    res.status(200).json({
+      message: "Registration for this event is canceled successfully.",
+    });
+  } catch (errror) {
+    console.log(error);
+    res.status(500).json({ message: "Fail to cancel registration." });
   }
 };
