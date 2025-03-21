@@ -8,13 +8,15 @@ import Event from "../Models/eventModel.js";
 // User sign up function
 export const signUp = async (req, res) => {
   try {
-    const { firstName, lastName, email, password, role, phone } = req.body;
+    const { firstName, lastName, email, password, role } = req.body;
     const isExist = await User.findOne({ email: email });
 
+    //Hash the password for privacy
     const hashedPassword = await bcrypt.hash(password, 10);
     if (isExist) {
       res.status(400).json({ message: "User already exist" });
     }
+
     //Create new user
     const user = new User({
       firstName: firstName,
@@ -22,8 +24,8 @@ export const signUp = async (req, res) => {
       email: email,
       password: hashedPassword,
       role: role,
-      phone: phone,
     });
+
     await user.save();
     res.status(200).json({ message: "User signUp successfully." });
   } catch (error) {
@@ -37,6 +39,8 @@ export const signIn = async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email: email });
+
+    //Check whether the user is exist or not
     if (!user) {
       res.status(400).json({ message: "User not found" });
     }
@@ -45,6 +49,7 @@ export const signIn = async (req, res) => {
     if (!isMatch) {
       res.status(401).json({ message: "Invalid credentail" });
     }
+
     //Generate access token
     const accessToken = jwt.sign(
       {
@@ -55,12 +60,14 @@ export const signIn = async (req, res) => {
       process.env.ACCESS_TOKEN_SECRET,
       { expiresIn: "2h" }
     );
+
     //Generate refresh token
     const refreshToken = jwt.sign(
       { email: email },
       process.env.REFRESH_TOKEN_SECRET,
       { expiresIn: "30d" }
     );
+
     //Store token in cookie
     res.cookie("accessToken", accessToken, { httpOnly: true });
     res.cookie("refreshToken", refreshToken, { httpOnly: true });
@@ -82,14 +89,14 @@ export const userRegistration = async (req, res) => {
     const users = await User.findOne({ email: userEmail });
 
     if (!event) {
-      res.status(404).json({ message: "Event not found" });
+      return res.status(404).json({ message: "Event not found" });
     }
 
     //Check the capacity of the event is full or not
     const capacity = event.availableSlot;
     const numberOfRegisterd = event.registeredUsers.length;
     if (numberOfRegisterd >= capacity) {
-      res.status(401).json({
+      return res.status(401).json({
         message: "Registration failed. No available slots for this event.",
       });
     }
@@ -100,32 +107,34 @@ export const userRegistration = async (req, res) => {
     );
 
     if (isRegistered) {
-      res
+      return res
         .status(400)
         .json({ message: "User is already registered for this event" });
-    } else {
-      //Register user for event
-      event.registeredUsers.push({
-        firstName,
-        lastName,
-        email,
-        phone,
-      });
-
-      //Store the event in which the user registered
-      users.registerdToEvents.push({
-        eventId,
-        title: event.title,
-        location: event.location,
-        date: event.date,
-      });
     }
 
+    //Register user for event
+    event.registeredUsers.push({
+      firstName,
+      lastName,
+      email,
+      phone,
+    });
+
+    //Store the event in which the user registered
+    users.registerdToEvents.push({
+      eventId,
+      title: event.title,
+      location: event.location,
+      date: event.date,
+    });
+
+    //Save the registration
     await event.save();
     await users.save();
+
     res
       .status(200)
-      .json({ message: "User registered successfully for the event." });
+      .json({ message: "User registered successfully for this event." });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Registration fail." });
@@ -162,8 +171,6 @@ export const cancelRegistration = async (req, res) => {
       (regUser) => regUser.email !== userEmail
     );
 
-    
-
     // Remove the event from user's registered events
     users.registerdToEvents = users.registerdToEvents.filter(
       (regUser) => regUser.eventId.toString() !== eventId
@@ -180,4 +187,3 @@ export const cancelRegistration = async (req, res) => {
     res.status(500).json({ message: "Registration fail." });
   }
 };
-

@@ -14,10 +14,16 @@ export const createEvent = async (req, res) => {
       speakers,
       agenda,
     } = req.body;
-    const isExist = await Event.findOne({ title, date, location, isDeleted: false });
+    const userId = req.user._id;
+    const isExist = await Event.findOne({
+      title,
+      date,
+      location,
+      isDeleted: false,
+    });
 
     if (isExist) {
-      res.status(400).json({ message: "The event is already exist" });
+      return res.status(400).json({ message: "The event is already exist" });
     }
 
     const event = await new Event({
@@ -49,6 +55,11 @@ export const getAllEvent = async (req, res) => {
       "title description date time location availableSlot"
     );
 
+    //Check if there is the event or not
+    if (!events) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+
     res.status(200).json(events);
   } catch (error) {
     console.log(error);
@@ -62,12 +73,12 @@ export const viewDetails = async (req, res) => {
     const eventId = req.params.id;
 
     // Check if eventId is a valid MongoDB ObjectId
-
     const event = await Event.findOne({
       _id: eventId,
       isDeleted: false,
     }).select("agenda speakers");
 
+    //Check whether the event is found or not
     if (!event) {
       return res.status(404).json({ message: "Event not found." });
     }
@@ -102,7 +113,7 @@ export const updateEvent = async (req, res) => {
     );
 
     if (!updateEvent) {
-      res.status(404).json({ message: "Event not found." });
+      return res.status(404).json({ message: "Event not found." });
     }
 
     res
@@ -119,17 +130,39 @@ export const deleteEvent = async (req, res) => {
   try {
     const { eventId } = req.params;
     const event = await Event.findByIdAndUpdate(
-      {_id: eventId, isDeleted: false},
+      { _id: eventId, isDeleted: false },
       { isDeleted: true },
       { new: true }
     );
+    
+    //Check whether the event is foun or not
     if (!event) {
-      res.status(404).json({ message: "Event not found" });
+      return res.status(404).json({ message: "Event not found" });
     }
 
     res.status(200).json({ message: "Event deleted successfully." });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Can't delete the event" });
+  }
+};
+
+//Get a single event by id
+export const getEventById = async (req, res) => {
+  try {
+    const eventId = req.params.id;
+    const event = await Event.findOne({ _id: eventId, isDeleted: false });
+
+    //Check whether the event is exist in database or not
+    if (!event) {
+      return res.status(404).json({ message: "Event not found." });
+    }
+
+    res
+      .status(200)
+      .json({ message: "Successfullly fetch event by id.", event });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Can't access event by id." });
   }
 };

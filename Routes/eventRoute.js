@@ -1,12 +1,22 @@
 import express from "express";
-import { createEvent, getAllEvent, viewDetails, updateEvent, deleteEvent } from "../Controllers/eventController.js";
+import {
+  createEvent,
+  getAllEvent,
+  viewDetails,
+  updateEvent,
+  deleteEvent,
+  getEventById,
+} from "../Controllers/eventController.js";
+import { verifyToken, checkAdminRole } from "../Middlewares/authMiddleware.js";
+
 
 const router = express.Router();
 
-router.post("/create-event", createEvent);
-router.get("/get-event", getAllEvent);
-router.get("/details/:id", viewDetails);
-router.put("/update-event/:eventId", updateEvent);
-router.delete("/delete-event/:eventId", deleteEvent);
+router.post("/create-event", verifyToken, checkAdminRole, createEvent);
+router.put("/update-event/:eventId", verifyToken, checkAdminRole, updateEvent);
+router.delete("/delete-event/:eventId",verifyToken, checkAdminRole, deleteEvent);
+router.get("/get-event", verifyToken, getAllEvent);
+router.get("/details/:id", verifyToken, viewDetails);
+router.get("/event/:id", verifyToken, getEventById);
 
 export default router;
