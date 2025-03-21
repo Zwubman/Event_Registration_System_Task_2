@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 
+//Create an User model
 const userSchema = mongoose.Schema({
   firstName: {
     type: String,
@@ -34,15 +35,15 @@ const userSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "Event",
       },
-      title:{
-        type: String
+      title: {
+        type: String,
       },
       location: {
-        type: String
+        type: String,
       },
       date: {
-        type: Date
-      }
+        type: Date,
+      },
     },
   ],
 });

@@ -1,5 +1,7 @@
 import mongoose, { mongo } from "mongoose";
 
+
+//Create an Event model
 const eventSchema = mongoose.Schema({
   title: {
     type: String,

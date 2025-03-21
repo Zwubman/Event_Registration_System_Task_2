@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+
+//Send email notification if the user registered successfully for the eventS
 export const sendRegistrationEmail = async (
   userEmail,
   eventTitle,
@@ -21,6 +23,8 @@ export const sendRegistrationEmail = async (
       },
     });
 
+
+    //Email content
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: userEmail,

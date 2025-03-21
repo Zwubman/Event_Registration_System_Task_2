@@ -143,7 +143,10 @@ export const userRegistration = async (req, res) => {
 
     res
       .status(200)
-      .json({ message: "User registered successfully for this event." });
+      .json({
+        message:
+          "User has been successfully registered for this event and will receive a notification via email.",
+      });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Registration fail." });
