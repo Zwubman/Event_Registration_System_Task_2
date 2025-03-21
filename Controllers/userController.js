@@ -139,15 +139,12 @@ export const cancelRegistration = async (req, res) => {
     const userEmail = req.user.email;
 
     const event = await Event.findOne({ _id: eventId, isDeleted: false });
+    console.log(event);
     const users = await User.findOne({ email: userEmail });
+    console.log(users);
 
     if (!event) {
-      console.log(error);
-      res.status(404).json({ message: "Event not found." });
-    }
-
-    if (!user) {
-      res.status(404).json({ message: "User not found." });
+      res.status(404).json({ message: "Event not found" });
     }
 
     const isRegistered = event.registeredUsers.some(
@@ -155,7 +152,7 @@ export const cancelRegistration = async (req, res) => {
     );
 
     if (!isRegistered) {
-      res
+      return res
         .status(404)
         .json({ message: "User is not registered for this event." });
     }
@@ -165,9 +162,11 @@ export const cancelRegistration = async (req, res) => {
       (regUser) => regUser.email !== userEmail
     );
 
+    
+
     // Remove the event from user's registered events
     users.registerdToEvents = users.registerdToEvents.filter(
-      (regUser) => regUser.eventId !== eventId
+      (regUser) => regUser.eventId.toString() !== eventId
     );
 
     await event.save();
@@ -176,8 +175,9 @@ export const cancelRegistration = async (req, res) => {
     res.status(200).json({
       message: "Registration for this event is canceled successfully.",
     });
-  } catch (errror) {
+  } catch (error) {
     console.log(error);
-    res.status(500).json({ message: "Fail to cancel registration." });
+    res.status(500).json({ message: "Registration fail." });
   }
 };
+
