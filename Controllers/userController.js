@@ -4,6 +4,7 @@ import cookie from "cookie-parser";
 import bcrypt from "bcryptjs";
 import User from "../Models/userModel.js";
 import Event from "../Models/eventModel.js";
+import { sendRegistrationEmail } from "../Helpers/sendMail.js";
 
 // User sign up function
 export const signUp = async (req, res) => {
@@ -131,6 +132,14 @@ export const userRegistration = async (req, res) => {
     //Save the registration
     await event.save();
     await users.save();
+
+    //Send email notification
+    await sendRegistrationEmail(
+      userEmail,
+      event.title,
+      event.date,
+      event.location
+    );
 
     res
       .status(200)
