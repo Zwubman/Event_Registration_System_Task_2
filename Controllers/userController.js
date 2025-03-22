@@ -141,12 +141,10 @@ export const userRegistration = async (req, res) => {
       event.location
     );
 
-    res
-      .status(200)
-      .json({
-        message:
-          "User has been successfully registered for this event and will receive a notification via email.",
-      });
+    res.status(200).json({
+      message:
+        "User has been successfully registered for this event and will receive a notification via email.",
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Registration fail." });
@@ -197,5 +195,33 @@ export const cancelRegistration = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Registration fail." });
+  }
+};
+
+//To get all the event I have been registered for it
+export const getAllEventRegisteredTo = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const user = await User.findOne({ _id: userId });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    //get allevents 
+    const events = user.registerdToEvents;
+
+    res
+      .status(200)
+      .json({
+        message: "Event that you have been registered for it is:",
+        events,
+      });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Fail to fetch all event in which you have been registered.",
+    });
   }
 };

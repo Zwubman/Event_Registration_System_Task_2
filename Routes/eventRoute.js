@@ -6,6 +6,7 @@ import {
   updateEvent,
   deleteEvent,
   getEventById,
+  getAllregisteredUsers,
 } from "../Controllers/eventController.js";
 import { verifyToken, checkAdminRole } from "../Middlewares/authMiddleware.js";
 
@@ -18,5 +19,6 @@ router.delete("/delete-event/:eventId",verifyToken, checkAdminRole, deleteEvent)
 router.get("/get-event", verifyToken, getAllEvent);
 router.get("/details/:id", verifyToken, viewDetails);
 router.get("/event/:id", verifyToken, getEventById);
+router.get("/registered-users/:id", getAllregisteredUsers);
 
 export default router;
